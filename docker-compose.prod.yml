@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-dnd_online}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      PORT: 8787
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-dnd_online}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-pro}
+      BOT_TOKEN: ${BOT_TOKEN}
+    ports:
+      - "8787:8787"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "80:80"
+
+  onebot-adapter:
+    profiles: ["onebot"]
+    build:
+      context: .
+      dockerfile: Dockerfile.onebot
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      DND_SERVER_URL: http://server:8787
+      BOT_TOKEN: ${BOT_TOKEN}
+      ADAPTER_PORT: ${ADAPTER_PORT:-6700}
+      ONEBOT_ACCESS_TOKEN: ${ONEBOT_ACCESS_TOKEN:-}
+      LOG_LEVEL: info
+    ports:
+      - "${ADAPTER_PORT:-6700}:${ADAPTER_PORT:-6700}"
+
+volumes:
+  pg_data:
+

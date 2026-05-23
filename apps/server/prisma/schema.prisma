@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RoomMemberRole {
+  GM
+  PLAYER
+}
+
+enum MessageKind {
+  CHAT
+  SYSTEM
+  DM
+}
+
+enum ItemKind {
+  ITEM
+  EQUIPMENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String?  @unique
+  passwordHash String?
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  roomsCreated Room[]       @relation("RoomCreatedBy")
+  memberships  RoomMember[]
+  messages     Message[]
+  modules      Module[]
+}
+
+model Room {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  createdById String
+  createdBy   User     @relation("RoomCreatedBy", fields: [createdById], references: [id])
+
+  members  RoomMember[]
+  messages Message[]
+  campaign Campaign?
+  onebotBindings OneBotGroupBinding[]
+}
+
+model RoomMember {
+  id        String          @id @default(cuid())
+  role      RoomMemberRole  @default(PLAYER)
+  joinedAt  DateTime        @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  @@unique([userId, roomId])
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  kind      MessageKind @default(CHAT)
+  text      String
+  authorName String
+  createdAt DateTime    @default(now())
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id])
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  versions ModuleVersion[]
+}
+
+model ModuleVersion {
+  id        String   @id @default(cuid())
+  version   Int
+  markdown  String
+  createdAt DateTime @default(now())
+
+  moduleId String
+  module   Module  @relation(fields: [moduleId], references: [id])
+
+  campaigns Campaign[] @relation("CampaignModuleVersion")
+
+  @@unique([moduleId, version])
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roomId String @unique
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  moduleVersionId String?
+  moduleVersion   ModuleVersion? @relation("CampaignModuleVersion", fields: [moduleVersionId], references: [id])
+
+  stateJson Json @default("{}")
+
+  saves Save[]
+}
+
+model Save {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  snapshotJson Json
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+}
+
+model Setting {
+  key       String   @id
+  valueJson Json
+  updatedAt DateTime @updatedAt
+}
+
+model OneBotGroupBinding {
+  id        String   @id @default(cuid())
+  groupId   String   @unique
+  roomId    String
+  createdAt DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  /**
+   * 可存绝对URL或相对路径（配合 Setting: assets.baseUrl 拼接）。
+   */
+  url       String
+  mimeType  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items Item[] @relation("ItemImageAsset")
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  kind        ItemKind @default(ITEM)
+  name        String
+  description String?
+  metaJson    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  imageAssetId String?
+  imageAsset   Asset?  @relation("ItemImageAsset", fields: [imageAssetId], references: [id])
+}

@@ -1,0 +1,27 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+COPY package.json package-lock.json tsconfig.base.json ./
+COPY packages/shared/package.json packages/shared/package.json
+COPY apps/onebot-adapter/package.json apps/onebot-adapter/package.json
+
+RUN npm ci
+
+COPY packages/shared packages/shared
+COPY apps/onebot-adapter apps/onebot-adapter
+
+RUN npm run build --workspace @dnd/shared \
+  && npm run build --workspace @dnd/onebot-adapter
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/onebot-adapter ./apps/onebot-adapter
+COPY --from=builder /app/packages/shared ./packages/shared
+
+EXPOSE 6700
+
+CMD ["node", "apps/onebot-adapter/dist/index.js"]
+

@@ -1,0 +1,38 @@
+{
+  "name": "@dnd/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:push": "prisma db push",
+    "admin:promote": "tsx src/scripts/promote-admin.ts",
+    "build": "prisma generate && tsc -p tsconfig.json --noEmit && tsup src/index.ts --format esm --platform node --out-dir dist",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@dnd/shared": "file:../../packages/shared",
+    "@prisma/client": "^6.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "nanoid": "^5.0.7",
+    "socket.io": "^4.7.5",
+    "zod": "^3.24.2",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "prisma": "^6.9.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

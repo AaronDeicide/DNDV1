@@ -1,0 +1,94 @@
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  color: #eaeaea;
+  background: #0f1218;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.card {
+  border: 1px solid #232a36;
+  background: #121826;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #232a36;
+  background: #0f1218;
+  color: #eaeaea;
+}
+
+button {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #2f3a4d;
+  background: #1b2433;
+  color: #eaeaea;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.muted {
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.chat {
+  height: 420px;
+  overflow: auto;
+  border: 1px solid #232a36;
+  border-radius: 10px;
+  padding: 10px;
+  background: #0f1218;
+}
+
+.msg {
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.msg:last-child {
+  border-bottom: none;
+}
+
+.msg .meta {
+  font-size: 12px;
+  color: #98a2b3;
+}
+
+.msg .text {
+  white-space: pre-wrap;
+}
+

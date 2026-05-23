@@ -1,0 +1,21 @@
+{
+  "name": "dnd-online",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:shared": "npm run dev --workspace @dnd/shared",
+    "dev:server": "npm run dev --workspace @dnd/server",
+    "dev:desktop": "npm run dev --workspace @dnd/desktop",
+    "dev:admin": "npm run dev --workspace @dnd/admin",
+    "dev:onebot": "npm run dev --workspace @dnd/onebot-adapter",
+    "dev": "concurrently -n shared,server,desktop,admin -c magenta,cyan,green,yellow \"npm:dev:shared\" \"npm:dev:server\" \"npm:dev:desktop\" \"npm:dev:admin\"",
+    "build": "npm run build --workspace @dnd/shared && npm run build --workspace @dnd/server && npm run build --workspace @dnd/desktop && npm run build --workspace @dnd/admin && npm run build --workspace @dnd/onebot-adapter"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
